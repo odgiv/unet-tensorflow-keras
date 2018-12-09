@@ -15,7 +15,7 @@ import numpy as np
 import scipy.misc as misc
 from model import UNet
 from utils import dice_coef, dice_coef_loss
-from loader import dataLoader, deprocess
+from loader import dataLoader, deprocess, dataLoaderNp
 from PIL import Image
 from utils import VIS, mean_IU
 
@@ -32,7 +32,7 @@ sess = tf.Session(config=config)
 
 # define data loader
 img_shape = [opt.imSize, opt.imSize]
-test_generator, test_samples = dataLoader(opt.data_path+'/val/', 1,  img_shape, train_mode=False)
+test_generator, test_samples = dataLoaderNp(opt.data_path, 1, train_mode=False)
 # define model, the last dimension is the channel
 label = tf.placeholder(tf.int32, shape=[None]+img_shape)
 with tf.name_scope('unet'):
