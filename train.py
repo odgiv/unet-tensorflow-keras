@@ -27,7 +27,7 @@ tf.set_random_seed(SEED)
 # configure args
 
 # save and compute metrics
-vis = VIS(save_path=opt.checkpoint_path)
+vis = VIS(save_path=opt.checkpoint_path, , is_train=True)
 
 # configuration session
 config = tf.ConfigProto()

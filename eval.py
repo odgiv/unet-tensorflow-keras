@@ -23,7 +23,7 @@ from utils import VIS, mean_IU
 from opts import *
 from opts import dataset_mean, dataset_std # set them in opts
 
-vis = VIS(save_path=opt.load_from_checkpoint)
+vis = VIS(save_path=opt.load_from_checkpoint, is_train=False)
 
 # configuration session
 config = tf.ConfigProto()
