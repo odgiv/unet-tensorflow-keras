@@ -51,7 +51,7 @@ sess.run(init_op)
 with sess.as_default():
     # restore from a checkpoint if exists
     try:
-        saver.restore(sess, opt.load_from_checkpoint)
+        saver.restore(sess, tf.train.latest_checkpoint(opt.load_from_checkpoint))
         print ('--> load from checkpoint '+opt.load_from_checkpoint)
     except:
         print ('unable to load checkpoint ...')
