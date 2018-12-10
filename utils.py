@@ -17,15 +17,15 @@ from skimage import measure
 
 
 class VIS:
-    def __init__(self, save_path):
+    def __init__(self, save_path, is_train):
 
         self.path = save_path
         # TODO
         self.semantic_label = None
-
-        if os.path.isdir(self.path):
-            shutil.rmtree(self.path)
-        os.mkdir(self.path)
+        if is_train:
+            if os.path.isdir(self.path):
+                shutil.rmtree(self.path)
+            os.mkdir(self.path)
 
         self.mean_iu = []
         self.cls_iu = []
