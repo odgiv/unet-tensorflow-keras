@@ -31,7 +31,7 @@ config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 
 # define data loader
-img_shape = [opt.imSize, opt.imSize]
+img_shape = [233, 369]  #img_shape = [opt.imSize, opt.imSize]
 test_generator, test_samples = dataLoaderNp(opt.data_path, 1, train_mode=False)
 # define model, the last dimension is the channel
 label = tf.placeholder(tf.int32, shape=[None]+img_shape)
