@@ -53,8 +53,8 @@ with sess.as_default():
     try:
         saver.restore(sess, tf.train.latest_checkpoint(opt.load_from_checkpoint))
         print ('--> load from checkpoint '+opt.load_from_checkpoint)
-    except:
-        print ('unable to load checkpoint ...')
+    except Exception as ex:
+        print ('Unable to load checkpoint ...', ex)
         sys.exit(0)
     dice_score = 0
     for it in range(0, test_samples):
@@ -67,8 +67,14 @@ with sess.as_default():
         loss, pred_logits = sess.run([cross_entropy_loss, pred], feed_dict=feed_dict)
         pred_map = np.argmax(pred_logits[0], axis=2)
         score = vis.add_sample(pred_map, y_batch[0])
-        
+
         im, gt = deprocess(x_batch[0], dataset_mean, dataset_std, y_batch[0])
+
+        # im = Image.fromarray(im)
+        # im.save(os.path.join(opt.load_from_checkpoint, '{0:}.png'.format(it)))
+        
+        # gt = Image.fromarray(gt, 'L')
+        # gt.save(os.path.join(opt.load_from_checkpoint, '{0:}_{1:.3f}.png'.format(it, score)))
         vis.save_seg(pred_map, name='{0:}_{1:.3f}.png'.format(it, score), im=im, gt=gt)
 
         print ('[iter %f]: loss=%f, meanIU=%f' % (it, loss, score))

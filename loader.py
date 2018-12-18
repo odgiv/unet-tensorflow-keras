@@ -51,8 +51,7 @@ def deprocess(img, mean, std, label):
 def imerge(a, b, mean, std, normalize_label):
     for img, label in itertools.zip_longest(a, b):
         # j is the mask: 1) gray-scale and int8
-        img, label = preprocess(img, mean, std, label,
-                                normalize_label=normalize_label)
+        img, label = preprocess(img, mean, std, label, normalize_label=normalize_label)
         yield img, label
 
 
@@ -171,10 +170,12 @@ def mergeDatasets(path):
 
 def dataLoaderNp(path, batch_size, train_mode=True, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
     X, Y = mergeDatasets(path)
-    X = X.reshape(X.shape[-1], X.shape[0], X.shape[1], 1)
-    Y = Y.reshape(Y.shape[-1], Y.shape[0], Y.shape[1], 1)
-    # X = np.expand_dims(X, -1)
-    # Y = np.expand_dims(Y, -1)
+    X = np.transpose(X, (2, 0, 1))
+    Y = np.transpose(Y, (2, 0, 1))
+
+    X = np.expand_dims(X, -1)
+    Y = np.expand_dims(Y, -1)
+
     train_data_gen_args = dict()
     # seed has to been set to synchronize img and mask generators
     seed = 1
@@ -196,22 +197,15 @@ def dataLoaderNp(path, batch_size, train_mode=True, mean=[0.5, 0.5, 0.5], std=[0
 
 
 if __name__ == "__main__":
-    X, Y = mergeDatasets(
-        "D:\\Users\\odgiiv.khuurkhunkhuu\\Datasets\\juliana_wo_symImages\\train")
-    print("X shape: ", X.shape)
-    print("Y shape: ", Y.shape)
+    path = "C:\\Users\\odgiiv\\tmp\\code\\u-net\\data\\juliana_wo_symImages\\test"
 
-    X = X.transpose(-1, 0, 1)
-    Y = Y.transpose(-1, 0, 1)
+    gen, samples = dataLoaderNp(path, 1, False)
 
-    print("X shape: ", X.shape)
-    print("Y shape: ", Y.shape)
-
-    nth = random.randrange(0, 100, 1)
-    print("Choosing image at {}th slice.".format(nth))
-
-    x = pil_image.fromarray(X[nth, :, :, ])
-    y = pil_image.fromarray(np.uint8(Y[nth, :, :] * 255), 'L')
+    x, y = next(gen)
+    x = np.uint8(x[0,:,:,0])    
+    y = np.uint8(y[0,:,:,0])
+    x = pil_image.fromarray(x, 'L')
+    y = pil_image.fromarray(y*255, 'L')
 
     x.show()
     y.show()
