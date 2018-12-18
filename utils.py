@@ -66,17 +66,16 @@ class VIS:
     def compute_scores(self, suffix=0):
         meanIU = np.mean(np.array(self.mean_iu))
         asarray = np.array(self.cls_iu)
-        # meanIU_per_cls = np.mean(asarray, axis=0)
+        meanIU_per_cls = np.mean(asarray, axis=0)
         print('-'*20)
         print('overall mean IU: {} '.format(meanIU))
         print('mean IU per class')
-        # for i, c in enumerate(meanIU_per_cls):
-        #     print('\t class {}: {}'.format(i, c))
+        for i, c in enumerate(meanIU_per_cls):
+            print('\t class {}: {}'.format(i, c))
         print('-'*20)
 
-        # data = {'mean_IU': '%.2f' % (meanIU), 'mean_IU_cls': [
-        #     '%.2f' % (a) for a in meanIU_per_cls.tolist()]}
-        data = {'mean_IU': '%.2f' % (meanIU)}
+        data = {'mean_IU': '%.2f' % (meanIU), 'mean_IU_cls': ['%.2f' % (a) for a in meanIU_per_cls.tolist()]}
+        # data = {'mean_IU': '%.2f' % (meanIU)}
 
         self.score_history['%.10d' % suffix] = data
         json.dump(self.score_history, open(os.path.join(
