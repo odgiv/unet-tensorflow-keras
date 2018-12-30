@@ -51,7 +51,7 @@ def deprocess(img, mean, std, label):
 def imerge(a, b, mean, std, normalize_label):
     for img, label in itertools.zip_longest(a, b):
         # j is the mask: 1) gray-scale and int8
-        #img, label = preprocess(img, mean, std, label, normalize_label=normalize_label)
+        img, label = preprocess(img, mean, std, label, normalize_label=normalize_label)
         yield img, label
 
 
