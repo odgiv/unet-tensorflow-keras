@@ -51,7 +51,7 @@ def deprocess(img, mean, std, label):
 def imerge(a, b, mean, std, normalize_label):
     for img, label in itertools.zip_longest(a, b):
         # j is the mask: 1) gray-scale and int8
-        img, label = preprocess(img, mean, std, label, normalize_label=normalize_label)
+        #img, label = preprocess(img, mean, std, label, normalize_label=normalize_label)
         yield img, label
 
 
@@ -176,7 +176,10 @@ def dataLoaderNp(path, batch_size, train_mode=True, mean=[0.5, 0.5, 0.5], std=[0
     X = np.expand_dims(X, -1)
     Y = np.expand_dims(Y, -1)
 
-    train_data_gen_args = dict()
+    train_data_gen_args = dict(
+        rotation_range=20,
+        zoom_range=[0.7, 1.]
+    )
     # seed has to been set to synchronize img and mask generators
     seed = 1
     train_image_datagen = ImageDataGenerator(**train_data_gen_args).flow(
@@ -201,11 +204,12 @@ if __name__ == "__main__":
 
     gen, samples = dataLoaderNp(path, 1, False)
 
-    x, y = next(gen)
-    x = np.uint8(x[0,:,:,0])    
-    y = np.uint8(y[0,:,:,0])
-    x = pil_image.fromarray(x, 'L')
-    y = pil_image.fromarray(y*255, 'L')
+    for _ in range(5):
+        x, y = next(gen)
+        x = np.uint8(x[0,:,:,0])    
+        y = np.uint8(y[0,:,:,0])
+        x = pil_image.fromarray(x)
+        y = pil_image.fromarray(y*255, 'L')
 
-    x.show()
-    y.show()
+        x.show()
+        y.show()
