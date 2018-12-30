@@ -104,7 +104,7 @@ with sess.as_default():
     # debug
     start = global_step.eval()
     for it in range(start, tot_iter):
-        if it % opt.iter_epoch == 0 or it == start:
+        if it % 1000 == 0 or it == start: #opt.iter_epoch
 
             saver.save(sess, opt.checkpoint_path +
                        'model', global_step=global_step)
