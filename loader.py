@@ -22,9 +22,10 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Modify this for data normalization
 def preprocess(img, mean, std, label, normalize_label=True):
-    out_img = img / img.max()  # scale to [0,1]
-    out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
-        np.array(std).reshape(1, 1, 3)
+    out_img = img
+    # out_img = img / img.max()  # scale to [0,1]
+    # out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
+    #     np.array(std).reshape(1, 1, 3)
 
     if len(label.shape) == 4:
         label = label[:, :, :, 0]
@@ -204,10 +205,10 @@ if __name__ == "__main__":
 
     gen, samples = dataLoaderNp(path, 1, False)
 
-    for _ in range(5):
+    for _ in range(10):
         x, y = next(gen)
         x = np.uint8(x[0,:,:,0])    
-        y = np.uint8(y[0,:,:,0])
+        y = np.uint8(y[0,:,:])
         x = pil_image.fromarray(x)
         y = pil_image.fromarray(y*255, 'L')
 

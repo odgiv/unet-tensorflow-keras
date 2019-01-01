@@ -53,7 +53,7 @@ label = tf.placeholder(tf.int32, shape=[None]+img_shape)
 # define model
 with tf.name_scope('unet'):
     model = UNet().create_model(
-        img_shape=img_shape+[3], num_class=opt.num_class)
+        img_shape=img_shape+[1], num_class=opt.num_class) #3
     img = model.input
     pred = model.output
 # define loss
