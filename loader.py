@@ -22,9 +22,10 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Modify this for data normalization
 def preprocess(img, mean, std, label, normalize_label=True):
-    out_img = img / img.max()  # scale to [0,1]
-    out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
-        np.array(std).reshape(1, 1, 3)
+    out_img = img
+    # out_img = img / img.max()  # scale to [0,1]
+    # out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
+    #     np.array(std).reshape(1, 1, 3)
 
     if len(label.shape) == 4:
         label = label[:, :, :, 0]
@@ -109,7 +110,7 @@ def dataLoader(path, batch_size, imSize, train_mode=True, mean=[0.5, 0.5, 0.5], 
     return generator, samples
 
 
-def mergeDatasets(path):
+def mergeDatasets(path, val_ratio=0.8, shuffle=True):
     list_us_array = []
     list_gt_array = []
 
@@ -119,8 +120,7 @@ def mergeDatasets(path):
    # max_num_zero_bottom_rows = 0
 
     for f in sorted(os.listdir(path)):
-        # If f is directory, not a file
-        files_directory = os.path.join(path, f)
+        files_directory = os.path.join(path, f) # If f is directory, not a file
         if not os.path.isdir(files_directory):
             continue
         print("entering directory: ", files_directory)
@@ -162,50 +162,80 @@ def mergeDatasets(path):
         list_us_array.append(us_vol)
         list_gt_array.append(gt_vol)
 
+    
     X = np.dstack(list_us_array)
     Y = np.dstack(list_gt_array)
 
-    return X, Y
+    X = np.transpose(X, (2, 0, 1))
+    Y = np.transpose(Y, (2, 0, 1))
+    np.random.seed(1)
+    np.random.shuffle(X)
+    np.random.seed(1)
+    np.random.shuffle(Y)
+    X_train = X[0:int(X.shape[0]*val_ratio),:,:]
+    Y_train = Y[0:int(Y.shape[0]*val_ratio),:,:]  
+    X_valid = X[int(X.shape[0]*val_ratio):,:,:]
+    Y_valid = Y[int(Y.shape[0]*val_ratio):,:,:]
+    return (X_train, Y_train, X_valid, Y_valid) 
 
 
 def dataLoaderNp(path, batch_size, train_mode=True, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
-    X, Y = mergeDatasets(path)
-    X = np.transpose(X, (2, 0, 1))
-    Y = np.transpose(Y, (2, 0, 1))
+    (X_train, Y_train, X_valid, Y_valid) = mergeDatasets(path)
 
-    X = np.expand_dims(X, -1)
-    Y = np.expand_dims(Y, -1)
+    X_train = np.expand_dims(X_train, -1)
+    Y_train = np.expand_dims(Y_train, -1)
+
+    X_valid = np.expand_dims(X_valid, -1)
+    Y_valid = np.expand_dims(Y_valid, -1)
 
     train_data_gen_args = dict(
         rotation_range=20,
         zoom_range=[0.7, 1.]
     )
+
+    valid_data_gen_args = dict(
+
+    )
     # seed has to been set to synchronize img and mask generators
     seed = 1
     train_image_datagen = ImageDataGenerator(**train_data_gen_args).flow(
-        x=X,
+        x=X_train,
         batch_size=batch_size,
         seed=seed,
         shuffle=train_mode)
     train_mask_datagen = ImageDataGenerator(**train_data_gen_args).flow(
-        x=Y,
+        x=Y_train,
         batch_size=batch_size,
         seed=seed,
         shuffle=train_mode)
 
-    generator = imerge(train_image_datagen,
+    valid_image_datagen = ImageDataGenerator(**valid_data_gen_args).flow(
+        x=X_valid,
+        batch_size=batch_size,
+        seed=seed,
+        shuffle=train_mode)
+    valid_mask_datagen = ImageDataGenerator(**valid_data_gen_args).flow(
+        x=Y_valid,
+        batch_size=batch_size,
+        seed=seed,
+        shuffle=train_mode)
+
+    train_generator = imerge(train_image_datagen,
                        train_mask_datagen, mean, std, False)
 
-    return generator, X.shape[0]
+    valid_generator = imerge(valid_image_datagen,
+                       valid_mask_datagen, mean, std, False)
+
+    return train_generator, valid_generator, X_train.shape[0], X_valid.shape[0]
 
 
 if __name__ == "__main__":
-    path = "C:\\Users\\odgiiv\\tmp\\code\\u-net\\data\\juliana_wo_symImages\\test"
+    path = "C:\\Users\\odgiiv\\tmp\\code\\u-net\\data\\juliana_wo_symImages\\train"
 
-    gen, samples = dataLoaderNp(path, 1, False)
+    train_gen, valid_gen, train_samples, valid_samples = dataLoaderNp(path, 1, False)
 
     for _ in range(10):
-        x, y = next(gen)
+        x, y = next(valid_gen)
         x = np.uint8(x[0,:,:,0])    
         y = np.uint8(y[0,:,:])
         x = pil_image.fromarray(x)
