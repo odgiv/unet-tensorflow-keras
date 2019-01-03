@@ -22,10 +22,10 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Modify this for data normalization
 def preprocess(img, mean, std, label, normalize_label=True):
-    out_img = img
-    # out_img = img / img.max()  # scale to [0,1]
-    # out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
-    #     np.array(std).reshape(1, 1, 3)
+    # out_img = img
+    out_img = img / img.max()  # scale to [0,1]
+    out_img = (out_img - np.array(mean).reshape(1, 1, 3)) / \
+        np.array(std).reshape(1, 1, 3)
 
     if len(label.shape) == 4:
         label = label[:, :, :, 0]
