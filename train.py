@@ -42,10 +42,9 @@ img_shape = [233, 369]  # [opt.imSize, opt.imSize]
 # test_generator, test_samples = dataLoader(
 #     opt.data_path+'/val/', 1,  img_shape, train_mode=False, mean=dataset_mean, std=dataset_std)
 
-train_generator, train_samples = dataLoaderNp(
+train_generator, test_generator, train_samples, test_samples = dataLoaderNp(
     opt.data_path + 'train/', opt.batch_size, mean=dataset_mean, std=dataset_std)
-test_generator, test_samples = dataLoaderNp(
-    opt.data_path + 'valid/', 1, train_mode=False, mean=dataset_mean, std=dataset_std)
+
 
 opt.iter_epoch = int(train_samples)
 # define input holders
