@@ -73,10 +73,10 @@ def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
     return -tf.sum(alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1))-tf.sum((1-alpha) * tf.pow( pt_0, gamma) * tf.log(1. - pt_0))
 
 def focal_loss(target, output, gamma=2):
-    output /= tf.sum(output, axis=-1, keepdims=True)
-    eps = tf.epsilon()
-    output = tf.clip(output, eps, 1. - eps)
-    return -tf.sum(tf.pow(1. - output, gamma) * target * tf.log(output), axis=-1)
+    output /= keras.backend.sum(output, axis=-1, keepdims=True)
+    eps = keras.backend.epsilon()
+    output = keras.backend.clip(output, eps, 1. - eps)
+    return -keras.backend.sum(keras.backend.pow(1. - output, gamma) * target * keras.backend.log(output), axis=-1)
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
