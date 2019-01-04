@@ -66,17 +66,14 @@ def focal_loss_softmax(labels,logits,gamma=2):
 def ignore_unknown_xentropy(ytrue, ypred):
     return (1-ytrue[:, :, :, 0])*tf.nn.sparse_softmax_cross_entropy_with_logits(ytrue, ypred)
 
-def focal_loss_fixed(y_true, y_pred, alpha=.25, gamma=2.):
-    y_true = keras.flatten(y_true)
-    y_pred = keras.flatten(y_pred)
+def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
+    pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
+    pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
 
-    alpha_factor = tf.ones_like(y_true) * alpha
-    alpha_factor = tf.where(tf.equal(y_true, 1), alpha_factor, 1 - alpha_factor)
-    focal_weight = tf.where(tf.equal(y_true, 1), 1 - y_pred, y_pred)
-    focal_weight = alpha_factor * focal_weight ** gamma
+    pt_1 = tf.clip(pt_1, 1e-3, .999)
+    pt_0 = tf.clip(pt_0, 1e-3, .999)
 
-    cls_loss = focal_weight * keras.binary_crossentropy(y_true, y_pred)
-    return  keras.sum(cls_loss)
+    return -tf.sum(alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1))-tf.sum((1-alpha) * tf.pow( pt_0, gamma) * tf.log(1. - pt_0))
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
