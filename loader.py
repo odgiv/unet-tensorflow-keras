@@ -35,7 +35,7 @@ def preprocess(img, mean, std, label, normalize_label=True):
                 'WRANING: the label has more than 2 classes. Set normalize_label to False')
         # if the loaded label is binary has only [0,255], then we normalize it
         label = label / label.max()
-    return out_img, label.astype("float32")
+    return out_img, label.astype(np.int32)
 
 
 def deprocess(img, mean, std, label):
