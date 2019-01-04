@@ -58,9 +58,12 @@ def focal_loss_softmax(labels,logits,gamma=2):
       A tensor of the same shape as `lables`
     """
     y_pred=tf.nn.softmax(logits,dim=-1) # [batch_size,num_classes]
+    eps = keras.backend.epsilon()
+    y_pred = keras.backend.clip(y_pred, eps, 1. - eps)
+
     labels=tf.one_hot(labels,depth=y_pred.shape[-1])
     L=-labels*((1-y_pred)**gamma)*tf.log(y_pred)
-    L=tf.reduce_mean(L,axis=-1)
+    L=tf.reduce_sum(L,axis=-1)
     return L
 
 def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
@@ -73,6 +76,7 @@ def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
     return -tf.sum(alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1))-tf.sum((1-alpha) * tf.pow( pt_0, gamma) * tf.log(1. - pt_0))
 
 def focal_loss(target, output, gamma=2.):
+    
     output /= keras.backend.sum(output, axis=-1, keepdims=True)
     eps = keras.backend.epsilon()
     output = keras.backend.clip(output, eps, 1. - eps)
@@ -115,7 +119,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = focal_loss(target=label, output=pred) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = tf.reduce_mean(focal_loss_softmax(labels=label, logits=pred)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
