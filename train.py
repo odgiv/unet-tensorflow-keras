@@ -67,8 +67,8 @@ def ignore_unknown_xentropy(ytrue, ypred):
     return (1-ytrue[:, :, :, 0])*tf.nn.sparse_softmax_cross_entropy_with_logits(ytrue, ypred)
 
 def focal_loss_fixed(y_true, y_pred, alpha=.25, gamma=2.):
-    y_true = K.flatten(y_true)
-    y_pred = K.flatten(y_pred)
+    y_true = keras.flatten(y_true)
+    y_pred = keras.flatten(y_pred)
 
     alpha_factor = tf.ones_like(y_true) * alpha
     alpha_factor = tf.where(tf.equal(y_true, 1), alpha_factor, 1 - alpha_factor)
