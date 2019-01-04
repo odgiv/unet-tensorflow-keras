@@ -72,8 +72,9 @@ def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
 
     return -tf.sum(alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1))-tf.sum((1-alpha) * tf.pow( pt_0, gamma) * tf.log(1. - pt_0))
 
-def focal_loss(target, output, gamma=2):
+def focal_loss(target, output, gamma=2.):
     tf.cast(target, tf.float32)
+    tf.cast(output, tf.float32)
     output /= keras.backend.sum(output, axis=-1, keepdims=True)
     eps = keras.backend.epsilon()
     output = keras.backend.clip(output, eps, 1. - eps)
