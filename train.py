@@ -13,6 +13,14 @@ from model import UNet
 import tensorflow as tf
 from tensorflow.python.ops import array_ops
 import numpy as np
+
+try:
+    from tensorflow.contrib import keras as keras
+    print ('load keras from tensorflow package')
+except:
+    print ('update your tensorflow')
+
+
 '''
  * @author [Zizhao Zhang]
  * @email [zizhao@cise.ufl.edu]
@@ -57,6 +65,18 @@ def focal_loss_softmax(labels,logits,gamma=2):
 
 def ignore_unknown_xentropy(ytrue, ypred):
     return (1-ytrue[:, :, :, 0])*tf.nn.sparse_softmax_cross_entropy_with_logits(ytrue, ypred)
+
+def focal_loss_fixed(y_true, y_pred, alpha=.25, gamma=2.):
+    y_true = K.flatten(y_true)
+    y_pred = K.flatten(y_pred)
+
+    alpha_factor = tf.ones_like(y_true) * alpha
+    alpha_factor = tf.where(tf.equal(y_true, 1), alpha_factor, 1 - alpha_factor)
+    focal_weight = tf.where(tf.equal(y_true, 1), 1 - y_pred, y_pred)
+    focal_weight = alpha_factor * focal_weight ** gamma
+
+    cls_loss = focal_weight * keras.binary_crossentropy(y_true, y_pred)
+    return  keras.sum(cls_loss)
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
