@@ -11,6 +11,7 @@ from loader import dataLoader, dataLoaderNp
 from utils import dice_coef
 from model import UNet
 import tensorflow as tf
+from tensorflow.python.ops import array_ops
 import numpy as np
 '''
  * @author [Zizhao Zhang]
@@ -19,6 +20,22 @@ import numpy as np
  * @modify date 2017-05-19 03:06:32
  * @desc [description]
 '''
+
+def focal_loss_softmax(labels,logits,gamma=2):
+    """
+    Computer focal loss for multi classification
+    Args:
+      labels: A int32 tensor of shape [batch_size].
+      logits: A float32 tensor of shape [batch_size,num_classes].
+      gamma: A scalar for focal loss gamma hyper-parameter.
+    Returns:
+      A tensor of the same shape as `lables`
+    """
+    y_pred=tf.nn.softmax(logits,dim=-1) # [batch_size,num_classes]
+    labels=tf.one_hot(labels,depth=y_pred.shape[-1])
+    L=-labels*((1-y_pred)**gamma)*tf.log(y_pred)
+    L=tf.reduce_sum(L,axis=1)
+    return L
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
@@ -57,8 +74,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = tf.reduce_mean(
-        tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = focal_loss_softmax(labels=label, logits=pred) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
