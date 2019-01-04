@@ -13,6 +13,7 @@ from model import UNet
 import tensorflow as tf
 from tensorflow.python.ops import array_ops
 import numpy as np
+from tensorflow.contrib.keras.backend import categorical_crossentropy
 '''
  * @author [Zizhao Zhang]
  * @email [zizhao@cise.ufl.edu]
@@ -52,8 +53,11 @@ def focal_loss_softmax(labels,logits,gamma=2):
     y_pred=tf.nn.softmax(logits,dim=-1) # [batch_size,num_classes]
     labels=tf.one_hot(labels,depth=y_pred.shape[-1])
     L=-labels*((1-y_pred)**gamma)*tf.log(y_pred)
-    L=tf.reduce_sum(L,axis=-1)
+    L=tf.reduce_mean(L,axis=-1)
     return L
+
+def ignore_unknown_xentropy(ytrue, ypred):
+    return (1-ytrue[:, :, :, 0])*categorical_crossentropy(ytrue, ypred)
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
@@ -92,7 +96,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = tf.reduce_mean(focal_loss_softmax(labels=label, logits=pred, gamma=1)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = tf.reduce_mean(ignore_unknown_xentropy(ytue=label, ypred=pred)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
