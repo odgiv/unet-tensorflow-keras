@@ -63,9 +63,6 @@ def focal_loss_softmax(labels,logits,gamma=2):
     L=tf.reduce_mean(L,axis=-1)
     return L
 
-def ignore_unknown_xentropy(ytrue, ypred):
-    return (1-ytrue[:, :, :, 0])*tf.nn.sparse_softmax_cross_entropy_with_logits(ytrue, ypred)
-
 def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
     pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
     pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
@@ -74,6 +71,12 @@ def focal_loss_fixed(y_true, y_pred, gamma=2., alpha=.25):
     pt_0 = tf.clip(pt_0, 1e-3, .999)
 
     return -tf.sum(alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1))-tf.sum((1-alpha) * tf.pow( pt_0, gamma) * tf.log(1. - pt_0))
+
+def focal_loss(target, output, gamma=2):
+    output /= tf.sum(output, axis=-1, keepdims=True)
+    eps = tf.epsilon()
+    output = tf.clip(output, eps, 1. - eps)
+    return -tf.sum(tf.pow(1. - output, gamma) * target * tf.log(output), axis=-1)
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
@@ -112,7 +115,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = focal_loss_fixed(y_true=label, y_pred=pred) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = focal_loss(target=label, output=pred) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
