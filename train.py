@@ -21,6 +21,24 @@ import numpy as np
  * @desc [description]
 '''
 
+def focal_loss_sigmoid(labels,logits,alpha=0.25,gamma=2):
+    """
+    Computer focal loss for binary classification
+    Args:
+      labels: A int32 tensor of shape [batch_size].
+      logits: A float32 tensor of shape [batch_size].
+      alpha: A scalar for focal loss alpha hyper-parameter. If positive samples number
+      > negtive samples number, alpha < 0.5 and vice versa.
+      gamma: A scalar for focal loss gamma hyper-parameter.
+    Returns:
+      A tensor of the same shape as `lables`
+    """
+    y_pred=tf.nn.sigmoid(logits)
+    labels=tf.to_float(labels)
+    L=-labels*(1-alpha)*((1-y_pred)*gamma)*tf.log(y_pred)-\
+      (1-labels)*alpha*(y_pred**gamma)*tf.log(1-y_pred)
+    return L
+
 def focal_loss_softmax(labels,logits,gamma=2):
     """
     Computer focal loss for multi classification
@@ -74,7 +92,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = tf.reduce_mean(focal_loss_softmax(labels=label, logits=pred)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = tf.reduce_mean(focal_loss_sigmoid(labels=label, logits=pred)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
