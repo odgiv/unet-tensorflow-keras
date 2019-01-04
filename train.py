@@ -74,7 +74,7 @@ with tf.name_scope('unet'):
     pred = model.output
 # define loss
 with tf.name_scope('cross_entropy'):
-    cross_entropy_loss = focal_loss_softmax(labels=label, logits=pred) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
+    cross_entropy_loss = tf.reduce_mean(focal_loss_softmax(labels=label, logits=pred)) #tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=pred))
 # define optimizer
 global_step = tf.Variable(0, name='global_step', trainable=False)
 with tf.name_scope('learning_rate'):
