@@ -13,7 +13,6 @@ from model import UNet
 import tensorflow as tf
 from tensorflow.python.ops import array_ops
 import numpy as np
-from tensorflow.contrib.keras.backend import categorical_crossentropy
 '''
  * @author [Zizhao Zhang]
  * @email [zizhao@cise.ufl.edu]
@@ -57,7 +56,7 @@ def focal_loss_softmax(labels,logits,gamma=2):
     return L
 
 def ignore_unknown_xentropy(ytrue, ypred):
-    return (1-ytrue[:, :, :, 0])*categorical_crossentropy(ytrue, ypred)
+    return (1-ytrue[:, :, :, 0])*tf.nn.sparse_softmax_cross_entropy_with_logits(ytrue, ypred)
 
 SEED = 0  # set set to allow reproducing runs
 np.random.seed(SEED)
