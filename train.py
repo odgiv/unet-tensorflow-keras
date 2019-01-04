@@ -29,10 +29,17 @@ def focal_loss_softmax(labels,logits,gamma=2):
       logits: A float32 tensor of shape [batch_size,num_classes].
       gamma: A scalar for focal loss gamma hyper-parameter.
     Returns:
+<<<<<<< HEAD
       A tensor of the same shape as `lables`
     """
     y_pred=tf.nn.softmax(logits,dim=-1) # [batch_size,num_classes]
     labels=tf.one_hot(labels,depth=y_pred.shape[-1])
+=======
+      A tensor of the same shape as `labels`
+    """
+    y_pred=tf.nn.softmax(logits,dim=-1) # [batch_size,num_classes]
+    labels=tf.one_hot(labels,depth=y_pred.shape[1])
+>>>>>>> 0f7fd6ef7f590c791d73d8e2bd68bc9bb50802bd
     L=-labels*((1-y_pred)**gamma)*tf.log(y_pred)
     L=tf.reduce_sum(L,axis=1)
     return L
