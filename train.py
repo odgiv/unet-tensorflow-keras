@@ -110,7 +110,7 @@ train_generator, test_generator, train_samples, test_samples = dataLoaderNp(
 
 opt.iter_epoch = int(train_samples)
 # define input holders
-label = tf.placeholder(tf.float32, shape=[None]+img_shape)
+label = tf.placeholder(tf.int32, shape=[None]+img_shape)
 # define model
 with tf.name_scope('unet'):
     model = UNet().create_model(
